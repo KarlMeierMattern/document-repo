@@ -1,0 +1,61 @@
+name: Deploy processor to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/processor/**"
+      - ".github/workflows/deploy-processor.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for Workload Identity Federation
+
+    env:
+      SERVICE: processor
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Deploy
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --source services/processor \
+            --no-allow-unauthenticated \
+            --memory 1Gi \
+            --cpu 1 \
+            --concurrency 4 \
+            --timeout 300 \
+            --max-instances 3 \
+            --min-instances 0 \
+            --set-secrets "DATABASE_URL=DATABASE_URL:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,R2_ACCOUNT_ID=R2_ACCOUNT_ID:latest,R2_BUCKET=R2_BUCKET:latest,R2_ACCESS_KEY_ID=R2_ACCESS_KEY_ID:latest,R2_SECRET_ACCESS_KEY=R2_SECRET_ACCESS_KEY:latest,PROCESSOR_SECRET=PROCESSOR_SECRET:latest"
+
+          gcloud run services add-iam-policy-binding "$SERVICE" \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --member="allUsers" \
+            --role="roles/run.invoker"
+
+      - name: Print URL
+        run: |
+          gcloud run services describe "$SERVICE" \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --format='value(status.url)'
