@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Document Repo — Containers (L2)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --r2: #ffd8a8;
+    --cloudrun: #b2f2bb;
+    --claude: #fcc2d7;
+    --neon: #c0eb75;
+    --resend: #ffe066;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --amber: #f08c00;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .node rect { stroke: var(--fg); stroke-width: 2; rx: 12; ry: 12; }
+  .node .title { font-weight: 600; font-size: 15px; fill: var(--fg); }
+  .node .meta  { font-size: 12px; fill: var(--muted); }
+  .edge { stroke-width: 2; fill: none; }
+  .edge.dashed { stroke-dasharray: 6 4; }
+  .edge-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .amber  { stroke: var(--amber);  } .amber-fill  { fill: var(--amber);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Document Repo — Containers (L2)</h1>
+  <p class="sub">Deployable units and the protocols between them. The numbered flow (1–7) traces a single upload-and-extract journey; the cron + email flow is amber, auth is purple.</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="blue-fill"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="orange-fill"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="green-fill"/></marker>
+        <marker id="arrow-amber"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="amber-fill"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="purple-fill"/></marker>
+      </defs>
+
+      <!-- Row 1 -->
+      <g class="node">
+        <rect x="60" y="120" width="220" height="90" fill="var(--resend)"/>
+        <text class="title" x="170" y="155" text-anchor="middle">Vercel Cron</text>
+        <text class="meta"  x="170" y="178" text-anchor="middle">Vercel platform · daily 09:00 UTC</text>
+        <text class="meta"  x="170" y="195" text-anchor="middle">defined in vercel.json</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="120" width="220" height="90" fill="var(--client)"/>
+        <text class="title" x="570" y="155" text-anchor="middle">Browser</text>
+        <text class="meta"  x="570" y="178" text-anchor="middle">User device</text>
+        <text class="meta"  x="570" y="195" text-anchor="middle">iPhone Safari · desktop</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="120" width="220" height="90" fill="var(--google)"/>
+        <text class="title" x="1010" y="155" text-anchor="middle">Google OAuth</text>
+        <text class="meta"  x="1010" y="178" text-anchor="middle">External · OAuth 2.0 IdP</text>
+        <text class="meta"  x="1010" y="195" text-anchor="middle">sign-in only</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g class="node">
+        <rect x="60" y="320" width="220" height="90" fill="var(--resend)"/>
+        <text class="title" x="170" y="355" text-anchor="middle">Resend</text>
+        <text class="meta"  x="170" y="378" text-anchor="middle">External · transactional email</text>
+        <text class="meta"  x="170" y="395" text-anchor="middle">digest delivery</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="320" width="220" height="90" fill="var(--vercel)" stroke-width="3"/>
+        <text class="title" x="570" y="355" text-anchor="middle">Next.js Web App</text>
+        <text class="meta"  x="570" y="378" text-anchor="middle">Vercel · Next.js 15 · Auth.js</text>
+        <text class="meta"  x="570" y="395" text-anchor="middle">apps/web · region fra1</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="320" width="220" height="90" fill="var(--r2)"/>
+        <text class="title" x="1010" y="355" text-anchor="middle">Cloudflare R2</text>
+        <text class="meta"  x="1010" y="378" text-anchor="middle">External · S3-compatible bucket</text>
+        <text class="meta"  x="1010" y="395" text-anchor="middle">raw/YYYY/MM/{docId}.{ext}</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g class="node">
+        <rect x="60" y="520" width="220" height="90" fill="var(--neon)"/>
+        <text class="title" x="170" y="555" text-anchor="middle">Neon Postgres</text>
+        <text class="meta"  x="170" y="578" text-anchor="middle">External · serverless Postgres</text>
+        <text class="meta"  x="170" y="595" text-anchor="middle">documents · fields · reminders</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="520" width="220" height="90" fill="var(--cloudrun)" stroke-width="3"/>
+        <text class="title" x="570" y="555" text-anchor="middle">FastAPI Processor</text>
+        <text class="meta"  x="570" y="578" text-anchor="middle">Cloud Run · Python 3.12 · FastAPI</text>
+        <text class="meta"  x="570" y="595" text-anchor="middle">services/processor</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="520" width="220" height="90" fill="var(--claude)"/>
+        <text class="title" x="1010" y="555" text-anchor="middle">Anthropic API</text>
+        <text class="meta"  x="1010" y="578" text-anchor="middle">External · Claude vision + tool-use</text>
+        <text class="meta"  x="1010" y="595" text-anchor="middle">prompt cached</text>
+      </g>
+
+      <!-- 1+3. Browser → Web (presign request, then process trigger) -->
+      <path d="M 570,210 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="585" y="245">1. POST /api/uploads/presign</text>
+      <text class="edge-label blue-fill" x="585" y="262">3. POST /api/documents/[id]/process</text>
+      <text class="edge-label blue-fill" x="585" y="279">session cookie</text>
+
+      <!-- 2. Browser → R2 (PUT presigned) -->
+      <path d="M 680,165 V 205 H 1010 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="850" y="198" text-anchor="middle">2. PUT image · presigned URL · ≤25 MB</text>
+
+      <!-- 4. Web → Processor (forward to Cloud Run) -->
+      <path d="M 570,410 V 520" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="585" y="450">4. POST /process</text>
+      <text class="edge-label blue-fill" x="585" y="467">X-Processor-Secret</text>
+      <text class="edge-label blue-fill" x="585" y="484">15s timeout · fire-and-forget</text>
+
+      <!-- 5. Processor → R2 (download bytes) -->
+      <path d="M 660,520 V 475 H 1010 V 410" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="850" y="468" text-anchor="middle">5. GET object · S3v4 · boto3</text>
+
+      <!-- 6. Processor → Anthropic -->
+      <path d="M 680,565 H 900" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="790" y="558" text-anchor="middle">6. POST /v1/messages · vision + tool</text>
+
+      <!-- 7. Processor → Neon (write extraction) -->
+      <path d="M 460,565 H 280" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="370" y="558" text-anchor="middle">7. INSERT fields + reminders</text>
+
+      <!-- Cron → Web (daily trigger) -->
+      <path d="M 170,210 V 290 H 510 V 320" class="edge amber" marker-end="url(#arrow-amber)"/>
+      <text class="edge-label amber-fill" x="350" y="283" text-anchor="middle">daily 09:00 UTC · Bearer CRON_SECRET</text>
+
+      <!-- Web → Resend (send digest) -->
+      <path d="M 460,365 H 280" class="edge amber" marker-end="url(#arrow-amber)"/>
+      <text class="edge-label amber-fill" x="370" y="358" text-anchor="middle">POST /emails · digest HTML</text>
+
+      <!-- Web → Neon (CRUD via Drizzle / polling) -->
+      <path d="M 530,410 V 475 H 170 V 520" class="edge green dashed" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="350" y="500" text-anchor="middle">queries (Drizzle · neon-http)</text>
+
+      <!-- Web → Google OAuth -->
+      <path d="M 630,320 V 290 H 850 V 165 H 900" class="edge purple dashed" marker-end="url(#arrow-purple)"/>
+      <text class="edge-label purple-fill" x="845" y="225" text-anchor="middle">OAuth callback · sign-in</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Upload journey (blue)</h3>
+      Browser asks Web for a presigned URL (creates a <code>documents</code> row in <code>uploaded</code> state), PUTs the file straight to R2, then asks Web to dispatch processing. Web flips status to <code>processing</code> and POSTs the processor — fire-and-forget with a 15 s timeout so Vercel doesn't block on Cloud Run.
+    </div>
+    <div class="legend-card">
+      <h3>Extraction (green)</h3>
+      Processor downloads the original from R2, normalises images (HEIC→JPEG, EXIF rotate, resize ≤1568 px), and runs the two-stage Claude pipeline. On success it writes <code>document_fields</code> + <code>reminders</code> and flips the doc to <code>processed</code> in one transaction.
+    </div>
+    <div class="legend-card">
+      <h3>Cron + email (amber)</h3>
+      Vercel registers the cron from <code>vercel.json</code> on production deploys only. The route auths via <code>Authorization: Bearer CRON_SECRET</code>, pulls reminders due ≤30 days, sends one digest, and bulk-updates them to <code>status='sent'</code>.
+    </div>
+    <div class="legend-card">
+      <h3>Auth (purple, dashed)</h3>
+      Auth.js + Google OAuth. The <code>signIn</code> callback rejects everything except <code>OWNER_EMAIL</code>, so the app is effectively single-user even though the OAuth provider is public.
+    </div>
+    <div class="legend-card">
+      <h3>Inter-service auth</h3>
+      Web → Processor: shared <code>X-Processor-Secret</code> header (rejected with 401 otherwise). Cron → Web: <code>Bearer CRON_SECRET</code>. R2 access keys never leave the two backend containers — the browser only ever sees short-lived presigned URLs.
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Document Repo — System Context (L1)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --r2: #ffd8a8;
+    --cloudrun: #b2f2bb;
+    --claude: #fcc2d7;
+    --neon: #c0eb75;
+    --resend: #ffe066;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --amber: #f08c00;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .node rect { stroke: var(--fg); stroke-width: 2; rx: 12; ry: 12; }
+  .node .title { font-weight: 600; font-size: 15px; fill: var(--fg); }
+  .node .meta  { font-size: 12px; fill: var(--muted); }
+  .edge { stroke-width: 2; fill: none; }
+  .edge.dashed { stroke-dasharray: 6 4; }
+  .edge-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .amber  { stroke: var(--amber);  } .amber-fill  { fill: var(--amber);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Document Repo — System Context (L1)</h1>
+  <p class="sub">Single-user app. The Owner photographs personal documents; the system OCRs and itemises them with Claude vision, surfaces upcoming reminders, and emails a daily digest.</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="blue-fill"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="orange-fill"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="green-fill"/></marker>
+        <marker id="arrow-amber"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="amber-fill"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="purple-fill"/></marker>
+      </defs>
+
+      <!-- Owner (Person) -->
+      <g class="node">
+        <rect x="460" y="120" width="220" height="90" fill="var(--google)"/>
+        <text class="title" x="570" y="155" text-anchor="middle">Owner</text>
+        <text class="meta"  x="570" y="178" text-anchor="middle">Person · single allow-listed user</text>
+        <text class="meta"  x="570" y="195" text-anchor="middle">iPhone Safari / desktop browser</text>
+      </g>
+
+      <!-- Anthropic API -->
+      <g class="node">
+        <rect x="900" y="120" width="220" height="90" fill="var(--claude)"/>
+        <text class="title" x="1010" y="155" text-anchor="middle">Anthropic API</text>
+        <text class="meta"  x="1010" y="178" text-anchor="middle">External · Claude vision</text>
+        <text class="meta"  x="1010" y="195" text-anchor="middle">classifier + 13 typed extractors</text>
+      </g>
+
+      <!-- Google OAuth -->
+      <g class="node">
+        <rect x="60" y="320" width="220" height="90" fill="var(--google)"/>
+        <text class="title" x="170" y="355" text-anchor="middle">Google OAuth</text>
+        <text class="meta"  x="170" y="378" text-anchor="middle">External · OAuth 2.0 IdP</text>
+        <text class="meta"  x="170" y="395" text-anchor="middle">gates the OWNER_EMAIL only</text>
+      </g>
+
+      <!-- Document Repo (the system) -->
+      <g class="node">
+        <rect x="460" y="320" width="220" height="90" fill="var(--vercel)" stroke-width="3"/>
+        <text class="title" x="570" y="355" text-anchor="middle">Document Repo</text>
+        <text class="meta"  x="570" y="378" text-anchor="middle">Personal document tracker</text>
+        <text class="meta"  x="570" y="395" text-anchor="middle">capture · extract · remind</text>
+      </g>
+
+      <!-- Resend -->
+      <g class="node">
+        <rect x="900" y="320" width="220" height="90" fill="var(--resend)"/>
+        <text class="title" x="1010" y="355" text-anchor="middle">Resend</text>
+        <text class="meta"  x="1010" y="378" text-anchor="middle">External · transactional email</text>
+        <text class="meta"  x="1010" y="395" text-anchor="middle">daily reminder digest</text>
+      </g>
+
+      <!-- Cloudflare R2 -->
+      <g class="node">
+        <rect x="60" y="520" width="220" height="90" fill="var(--r2)"/>
+        <text class="title" x="170" y="555" text-anchor="middle">Cloudflare R2</text>
+        <text class="meta"  x="170" y="578" text-anchor="middle">External · S3-compatible storage</text>
+        <text class="meta"  x="170" y="595" text-anchor="middle">original images / PDFs</text>
+      </g>
+
+      <!-- Neon Postgres -->
+      <g class="node">
+        <rect x="460" y="520" width="220" height="90" fill="var(--neon)"/>
+        <text class="title" x="570" y="555" text-anchor="middle">Neon Postgres</text>
+        <text class="meta"  x="570" y="578" text-anchor="middle">External · serverless Postgres</text>
+        <text class="meta"  x="570" y="595" text-anchor="middle">documents · fields · reminders</text>
+      </g>
+
+      <!-- Edges -->
+
+      <!-- 1. Owner → Document Repo (uploads / browses) -->
+      <path d="M 570,210 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="585" y="270">1. Uploads · browses · HTTPS</text>
+
+      <!-- 2. Document Repo → Anthropic (classify + extract) -->
+      <path d="M 650,320 V 270 H 1010 V 210" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="800" y="262" text-anchor="middle">Classify + extract · HTTPS</text>
+
+      <!-- 3. Document Repo → Google OAuth (sign-in) -->
+      <path d="M 460,365 H 280" class="edge purple dashed" marker-end="url(#arrow-purple)"/>
+      <text class="edge-label purple-fill" x="370" y="358" text-anchor="middle">OAuth sign-in</text>
+
+      <!-- 4. Document Repo → Cloudflare R2 (store / fetch) -->
+      <path d="M 530,410 V 475 H 170 V 520" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="350" y="468" text-anchor="middle">Store / fetch files · S3 API</text>
+
+      <!-- 5. Document Repo → Neon Postgres (SQL) -->
+      <path d="M 570,410 V 520" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="585" y="470">SQL/TLS · CRUD</text>
+
+      <!-- 6. Document Repo → Resend (send digest) -->
+      <path d="M 680,365 H 900" class="edge amber" marker-end="url(#arrow-amber)"/>
+      <text class="edge-label amber-fill" x="790" y="358" text-anchor="middle">Send digest · HTTPS</text>
+
+      <!-- 7. Resend → Owner (delivers email) -->
+      <path d="M 1120,360 V 60 H 570 V 120" class="edge amber dashed" marker-end="url(#arrow-amber)"/>
+      <text class="edge-label amber-fill" x="845" y="53" text-anchor="middle">Email digest · SMTP</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Owner</h3>
+      Single allow-listed Google account. Sign-ins outside <code>OWNER_EMAIL</code> are rejected by the Auth.js <code>signIn</code> callback. Captures are usually iPhone photos of receipts, prescriptions, warranties, etc.
+    </div>
+    <div class="legend-card">
+      <h3>Document Repo</h3>
+      Single-user, persistent free-tier stack. The L2 view shows the two deployable containers (Vercel-hosted Next.js app and Cloud-Run-hosted FastAPI processor) and the protocols between them.
+    </div>
+    <div class="legend-card">
+      <h3>Claude vision</h3>
+      Each document goes through two Claude calls: (1) classify into one of 13 doc types, (2) re-call with that type's tool schema to extract typed fields and reminders. Prompt + tool definitions are cached.
+    </div>
+    <div class="legend-card">
+      <h3>Storage split</h3>
+      Originals live in R2 (cheap, large blobs). Structured extraction lives in Postgres. The web app never holds files in memory — it mints presigned PUT/GET URLs for the browser and the processor.
+    </div>
+    <div class="legend-card">
+      <h3>Daily digest</h3>
+      A Vercel cron job at 09:00 UTC pulls reminders due in the next 30 days and ships a Resend email to <code>OWNER_EMAIL</code>. Sent reminders are flipped to <code>status='sent'</code> in the same request.
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -46,27 +46,17 @@ for name in DATABASE_URL ANTHROPIC_API_KEY R2_ACCOUNT_ID R2_BUCKET \
 done
 ```
 
-## 4. Deploy processor (manual first time)
+## 4. Deploy processor
 
-```bash
-GCP_PROJECT=MY_PROJECT REGION=us-central1 ./infra/cloud-run-deploy.sh
-```
-Note the printed URL — set `PROCESSOR_URL=<url>/process` in Vercel.
+In the Cloud Run console, create the service from the GitHub repo with a Cloud Build trigger on `services/processor/**`. Bind the secrets above via "Variables & Secrets". Note the printed URL — set `PROCESSOR_URL=<url>/process` in Vercel.
 
-## 5. Workload Identity Federation for GitHub Actions (optional)
-
-For automatic redeploy on push:
-1. Create a service account `github-deploy@MY_PROJECT.iam.gserviceaccount.com` with roles: `roles/run.admin`, `roles/iam.serviceAccountUser`, `roles/secretmanager.secretAccessor`, `roles/artifactregistry.writer`, `roles/cloudbuild.builds.editor`, `roles/storage.admin`.
-2. Set up WIF following [Google's guide](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
-3. Add GitHub secrets: `GCP_PROJECT`, `GCP_REGION`, `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SA`.
-
-## 6. Vercel
+## 5. Vercel
 
 1. Import the repo. Set **root directory** = `apps/web`.
 2. Add env vars from `.env.example` (everything in the Vercel block).
 3. Deploy. The cron in `apps/web/vercel.json` registers automatically.
 
-## 7. Smoke test
+## 6. Smoke test
 
 1. Visit your Vercel URL; sign in with the allowlisted Google account.
 2. From iPhone Safari, open the site → tap **Take photo** → snap a warranty receipt.

@@ -64,7 +64,7 @@ Point `PROCESSOR_URL` in `apps/web/.env.local` at `http://localhost:8080/process
 ## Deploy
 
 - **Web**: push to `main` → Vercel deploys automatically (set env vars in Vercel dashboard).
-- **Processor**: GitHub Actions workflow on push to `main` when `services/processor/**` changes. See `infra/cloud-run-deploy.sh` for manual deploy.
+- **Processor**: Cloud Build trigger (configured in the Cloud Run console) on push to `main` when `services/processor/**` changes.
 
 ## License
 

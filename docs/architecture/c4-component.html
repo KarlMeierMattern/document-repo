@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Document Repo — Processor Components (L3)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --r2: #ffd8a8;
+    --cloudrun: #b2f2bb;
+    --claude: #fcc2d7;
+    --neon: #c0eb75;
+    --resend: #ffe066;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --amber: #f08c00;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .node rect { stroke: var(--fg); stroke-width: 2; rx: 12; ry: 12; }
+  .node .title { font-weight: 600; font-size: 15px; fill: var(--fg); }
+  .node .meta  { font-size: 12px; fill: var(--muted); }
+  .edge { stroke-width: 2; fill: none; }
+  .edge.dashed { stroke-dasharray: 6 4; }
+  .edge-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .amber  { stroke: var(--amber);  } .amber-fill  { fill: var(--amber);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Document Repo — Processor Components (L3)</h1>
+  <p class="sub">Inside the FastAPI processor on Cloud Run. The orchestrator (<code>main.py</code>) drives a fixed pipeline; flow numbered 1–9. Sibling containers (Web App, R2, Anthropic, Neon) shown in their L2 fills.</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="blue-fill"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="orange-fill"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="green-fill"/></marker>
+        <marker id="arrow-amber"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="amber-fill"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="purple-fill"/></marker>
+      </defs>
+
+      <!-- Row 1 -->
+      <g class="node">
+        <rect x="40" y="120" width="220" height="90" fill="var(--vercel)"/>
+        <text class="title" x="150" y="155" text-anchor="middle">Next.js Web App</text>
+        <text class="meta"  x="150" y="178" text-anchor="middle">Sibling container · Vercel</text>
+        <text class="meta"  x="150" y="195" text-anchor="middle">trigger only</text>
+      </g>
+
+      <g class="node">
+        <rect x="340" y="120" width="220" height="90" fill="var(--cloudrun)" stroke-width="3"/>
+        <text class="title" x="450" y="155" text-anchor="middle">/process route</text>
+        <text class="meta"  x="450" y="178" text-anchor="middle">main.py · FastAPI handler</text>
+        <text class="meta"  x="450" y="195" text-anchor="middle">orchestrator + status writes</text>
+      </g>
+
+      <g class="node">
+        <rect x="640" y="120" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="750" y="155" text-anchor="middle">claude_client.py</text>
+        <text class="meta"  x="750" y="178" text-anchor="middle">anthropic SDK wrapper</text>
+        <text class="meta"  x="750" y="195" text-anchor="middle">cache_control: ephemeral</text>
+      </g>
+
+      <g class="node">
+        <rect x="940" y="120" width="220" height="90" fill="var(--claude)"/>
+        <text class="title" x="1050" y="155" text-anchor="middle">Anthropic API</text>
+        <text class="meta"  x="1050" y="178" text-anchor="middle">External · vision + tool-use</text>
+        <text class="meta"  x="1050" y="195" text-anchor="middle">DEFAULT_MODEL</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g class="node">
+        <rect x="40" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="150" y="355" text-anchor="middle">storage.py</text>
+        <text class="meta"  x="150" y="378" text-anchor="middle">boto3 S3 client (R2)</text>
+        <text class="meta"  x="150" y="395" text-anchor="middle">download_bytes(key)</text>
+      </g>
+
+      <g class="node">
+        <rect x="340" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="450" y="355" text-anchor="middle">image_prep.py</text>
+        <text class="meta"  x="450" y="378" text-anchor="middle">Pillow + pillow_heif</text>
+        <text class="meta"  x="450" y="395" text-anchor="middle">HEIC→JPEG · EXIF · resize</text>
+      </g>
+
+      <g class="node">
+        <rect x="640" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="750" y="355" text-anchor="middle">extractors registry</text>
+        <text class="meta"  x="750" y="378" text-anchor="middle">extractors/__init__.py</text>
+        <text class="meta"  x="750" y="395" text-anchor="middle">classify_and_extract(...)</text>
+      </g>
+
+      <g class="node">
+        <rect x="940" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="1050" y="355" text-anchor="middle">db.py</text>
+        <text class="meta"  x="1050" y="378" text-anchor="middle">psycopg3 · single tx</text>
+        <text class="meta"  x="1050" y="395" text-anchor="middle">write_extraction(...)</text>
+      </g>
+
+      <!-- Row 3 (externals only) -->
+      <g class="node">
+        <rect x="40" y="520" width="220" height="90" fill="var(--r2)"/>
+        <text class="title" x="150" y="555" text-anchor="middle">Cloudflare R2</text>
+        <text class="meta"  x="150" y="578" text-anchor="middle">Sibling external</text>
+        <text class="meta"  x="150" y="595" text-anchor="middle">raw/YYYY/MM/{docId}.{ext}</text>
+      </g>
+
+      <g class="node">
+        <rect x="940" y="520" width="220" height="90" fill="var(--neon)"/>
+        <text class="title" x="1050" y="555" text-anchor="middle">Neon Postgres</text>
+        <text class="meta"  x="1050" y="578" text-anchor="middle">Sibling external</text>
+        <text class="meta"  x="1050" y="595" text-anchor="middle">documents · fields · reminders</text>
+      </g>
+
+      <!-- 1. Web App → /process -->
+      <path d="M 260,165 H 340" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="300" y="158" text-anchor="middle">1. POST /process · X-Processor-Secret</text>
+
+      <!-- 2. /process → storage -->
+      <path d="M 410,210 V 270 H 150 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="285" y="263" text-anchor="middle">2. download_bytes(r2_key)</text>
+
+      <!-- 3. storage → R2 -->
+      <path d="M 150,410 V 520" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="165" y="470">3. GET object · S3v4</text>
+
+      <!-- 4. /process → image_prep -->
+      <path d="M 470,210 V 285 H 450 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="478" y="265">4. normalize(raw)</text>
+
+      <!-- 5. /process → extractors registry -->
+      <path d="M 510,210 V 300 H 750 V 320" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="635" y="293" text-anchor="middle">5. classify_and_extract(media, type)</text>
+
+      <!-- 6. extractors → claude_client (two calls: classify + extract) -->
+      <path d="M 770,320 V 210" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="785" y="270">6. call_vision_tool · ×2</text>
+
+      <!-- 7. claude_client → Anthropic -->
+      <path d="M 860,165 H 940" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="900" y="158" text-anchor="middle">7. messages.create · prompt-cached</text>
+
+      <!-- 8. /process → db.py -->
+      <path d="M 580,210 V 440 H 1020 V 410" class="edge blue" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="800" y="433" text-anchor="middle">8. write_extraction(doc_type, fields, reminders)</text>
+
+      <!-- 9. db.py → Neon -->
+      <path d="M 1080,410 V 520" class="edge green" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="1095" y="470">9. INSERT/UPDATE · psycopg</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Two-stage Claude pipeline</h3>
+      Step 6 actually fires <em>two</em> messages.create calls: a classifier first (returns <code>doc_type</code>), then the matched type's extractor with its tool schema (returns typed fields + reminders). Unknown classifier output falls back to <code>generic</code>.
+    </div>
+    <div class="legend-card">
+      <h3>Prompt caching</h3>
+      <code>claude_client.py</code> sets <code>cache_control: ephemeral</code> on both the system prompt and the tool definition. Repeated calls for the same doc type hit the cache, making re-runs ~10× cheaper / faster.
+    </div>
+    <div class="legend-card">
+      <h3>Image prep is conditional</h3>
+      PDFs (<code>application/pdf</code>) skip <code>image_prep</code> entirely and go to Claude as a <code>document</code> content block. Everything else is HEIC-decoded, EXIF-rotated, and resized to ≤1568 px before being sent as an <code>image</code> block.
+    </div>
+    <div class="legend-card">
+      <h3>Atomic writes</h3>
+      <code>db.write_extraction</code> wipes prior <code>document_fields</code> + <code>reminders</code> for the doc, inserts the new ones, and flips the <code>documents</code> row to <code>processed</code> — all in one transaction. On exception, the route flips <code>status='failed'</code> with a truncated error.
+    </div>
+    <div class="legend-card">
+      <h3>13 doc types</h3>
+      <code>warranty</code>, <code>prescription</code>, <code>lab_result</code>, <code>insurance_card</code>, <code>invoice</code>, <code>receipt</code>, <code>vehicle_registration</code>, <code>vaccination_record</code>, <code>id_document</code>, <code>dna_report</code>, <code>medical_record</code>, <code>photo</code>, <code>generic</code>. Each is its own module under <code>extractors/</code> exporting <code>NAME</code>, <code>SYSTEM_PROMPT</code>, <code>TOOL</code>, <code>transform()</code>.
+    </div>
+  </div>
+</div>
+</body>
+</html>
