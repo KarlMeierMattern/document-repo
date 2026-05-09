@@ -100,12 +100,20 @@ export function DocumentDetail({
       <div className="space-y-3">
         <div className="rounded-lg border border-border bg-muted aspect-[4/3] overflow-hidden">
           {previewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={previewUrl}
-              alt={doc.originalFilename ?? "Document"}
-              className="w-full h-full object-contain"
-            />
+            doc.mimeType === "application/pdf" ? (
+              <iframe
+                src={previewUrl}
+                title={doc.originalFilename ?? "Document"}
+                className="w-full h-full"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewUrl}
+                alt={doc.originalFilename ?? "Document"}
+                className="w-full h-full object-contain"
+              />
+            )
           ) : (
             <div className="flex items-center justify-center h-full text-muted-fg text-sm">
               No preview

@@ -16,6 +16,17 @@ SERVICE="${SERVICE:-processor}"
 
 cd "$(dirname "$0")/../services/processor"
 
+# Grant Secret Manager access to the Cloud Run runtime service account
+# (default Compute Engine SA). Idempotent.
+PROJECT_NUMBER="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
+RUNTIME_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+echo "→ granting secretmanager.secretAccessor to $RUNTIME_SA"
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/secretmanager.secretAccessor" \
+  --condition=None \
+  --quiet >/dev/null
+
 echo "→ deploying $SERVICE to project=$PROJECT region=$REGION"
 
 gcloud run deploy "$SERVICE" \

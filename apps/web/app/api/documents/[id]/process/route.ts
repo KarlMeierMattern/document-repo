@@ -58,6 +58,7 @@ export async function POST(
     body: JSON.stringify({
       document_id: doc.id,
       r2_key: doc.r2Key,
+      mime_type: doc.mimeType,
       model,
     }),
     // Don't block this route on processor latency; Cloud Run will keep running.

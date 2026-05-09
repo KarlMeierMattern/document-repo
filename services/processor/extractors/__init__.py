@@ -59,12 +59,12 @@ REGISTRY = {
 
 
 def classify_and_extract(
-    *, image_bytes: bytes, image_media_type: str, model: str | None
+    *, media_bytes: bytes, media_type: str, model: str | None
 ) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
     # 1. Classify
     parsed = call_vision_tool(
-        image_bytes=image_bytes,
-        image_media_type=image_media_type,
+        media_bytes=media_bytes,
+        media_type=media_type,
         system_prompt=classifier.SYSTEM_PROMPT,
         tool=classifier.TOOL,
         model=model,
@@ -78,8 +78,8 @@ def classify_and_extract(
     # 2. Extract with the matched extractor
     ext = REGISTRY[doc_type]
     parsed = call_vision_tool(
-        image_bytes=image_bytes,
-        image_media_type=image_media_type,
+        media_bytes=media_bytes,
+        media_type=media_type,
         system_prompt=ext.SYSTEM_PROMPT,
         tool=ext.TOOL,
         model=model,

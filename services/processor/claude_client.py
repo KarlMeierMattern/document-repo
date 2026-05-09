@@ -28,8 +28,8 @@ def client() -> Anthropic:
 
 def call_vision_tool(
     *,
-    image_bytes: bytes,
-    image_media_type: str,
+    media_bytes: bytes,
+    media_type: str,
     system_prompt: str,
     tool: dict[str, Any],
     user_text: str | None = None,
@@ -37,19 +37,23 @@ def call_vision_tool(
     max_tokens: int = 1024,
 ) -> dict[str, Any]:
     """
-    Run a single vision call that MUST return a tool call. Returns the tool
-    input (parsed JSON dict). Caches system prompt + tool definition.
+    Run a single vision/document call that MUST return a tool call. Returns
+    the tool input (parsed JSON dict). Caches system prompt + tool definition.
+
+    media_type "application/pdf" is sent as a `document` content block;
+    everything else is sent as an `image` block.
     """
     model = model or settings.DEFAULT_MODEL
-    image_b64 = base64.b64encode(image_bytes).decode("ascii")
+    media_b64 = base64.b64encode(media_bytes).decode("ascii")
 
+    block_type = "document" if media_type == "application/pdf" else "image"
     user_content: list[dict[str, Any]] = [
         {
-            "type": "image",
+            "type": block_type,
             "source": {
                 "type": "base64",
-                "media_type": image_media_type,
-                "data": image_b64,
+                "media_type": media_type,
+                "data": media_b64,
             },
         }
     ]

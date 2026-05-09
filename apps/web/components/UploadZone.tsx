@@ -18,7 +18,8 @@ type FileState = {
   error?: string;
 };
 
-const ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif";
+const ACCEPT =
+  "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf";
 
 export function UploadZone({ onChange }: { onChange?: () => void }) {
   const [files, setFiles] = useState<FileState[]>([]);

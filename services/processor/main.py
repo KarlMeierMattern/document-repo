@@ -22,6 +22,7 @@ app = FastAPI(title="Document Processor")
 class ProcessRequest(BaseModel):
     document_id: str
     r2_key: str
+    mime_type: str | None = None
     model: str | None = None  # optional override (e.g. high-quality reprocess)
 
 
@@ -48,11 +49,15 @@ def process(
     db.update_status(body.document_id, "processing")
     try:
         raw = storage.download_bytes(body.r2_key)
-        jpeg, media_type = image_prep.normalize(raw)
+
+        if (body.mime_type or "").lower() == "application/pdf":
+            media_bytes, media_type = raw, "application/pdf"
+        else:
+            media_bytes, media_type = image_prep.normalize(raw)
 
         doc_type, fields, reminders = classify_and_extract(
-            image_bytes=jpeg,
-            image_media_type=media_type,
+            media_bytes=media_bytes,
+            media_type=media_type,
             model=body.model,
         )
 
