@@ -1,8 +1,8 @@
 import { DeleteDocumentButton } from "@/components/DeleteDocumentButton";
+import { DocumentsSearch } from "@/components/DocumentsSearch";
 import { Header } from "@/components/Header";
 import { auth } from "@/lib/auth";
 import { listDocuments } from "@/lib/queries";
-import { DOC_TYPES } from "@/drizzle/schema";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -28,30 +28,7 @@ export default async function DocumentsList({
     <>
       <Header email={session.user.email} />
       <main className="mx-auto max-w-5xl px-4 py-6 space-y-4">
-        <form className="flex flex-col sm:flex-row gap-2" action="/documents">
-          <select
-            name="type"
-            defaultValue={sp.type ?? ""}
-            className="rounded-lg border border-border px-3 py-2 text-sm bg-bg"
-          >
-            <option value="">All types</option>
-            {DOC_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-          <input
-            type="search"
-            name="q"
-            defaultValue={sp.q ?? ""}
-            placeholder="Search filename"
-            className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-bg"
-          />
-          <button className="rounded-lg bg-fg text-bg px-4 py-2 text-sm font-medium">
-            Apply
-          </button>
-        </form>
+        <DocumentsSearch initialType={sp.type ?? ""} initialQ={sp.q ?? ""} />
 
         {docs.length === 0 ? (
           <p className="text-sm text-muted-fg">No documents match.</p>
