@@ -28,6 +28,7 @@ export function DocumentDetail({
     "idle"
   );
   const [reprocessing, startReprocess] = useTransition();
+  const [deleting, startDelete] = useTransition();
   const [status, setStatus] = useState(doc.status);
 
   async function saveField(fieldId: string, value: string) {
@@ -84,6 +85,14 @@ export function DocumentDetail({
     });
   }
 
+  function deleteDocument() {
+    if (!confirm("Delete this document? This cannot be undone.")) return;
+    startDelete(async () => {
+      await fetch(`/api/documents/${doc.id}`, { method: "DELETE" });
+      router.push("/dashboard");
+    });
+  }
+
   async function dismissReminder(id: string) {
     setReminders((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: "dismissed" } : r))
@@ -137,6 +146,13 @@ export function DocumentDetail({
             className="rounded-lg border border-border px-3 py-2 text-sm font-medium disabled:opacity-50"
           >
             Reprocess (high quality)
+          </button>
+          <button
+            disabled={deleting}
+            onClick={deleteDocument}
+            className="rounded-lg border border-danger/40 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/5 disabled:opacity-50 ml-auto"
+          >
+            {deleting ? "Deleting…" : "Delete"}
           </button>
         </div>
         {doc.error && (

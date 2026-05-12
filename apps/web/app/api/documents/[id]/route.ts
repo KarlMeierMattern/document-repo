@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
-import { presignGet } from "@/lib/storage";
+import { deleteObject, presignGet } from "@/lib/storage";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -67,8 +67,9 @@ export async function DELETE(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  if (doc.r2Key) {
+    await deleteObject(doc.r2Key);
+  }
   await db.delete(schema.documents).where(eq(schema.documents.id, id));
-  // Note: R2 object is intentionally left in place; an optional lifecycle
-  // rule can clean up `raw/` orphans later.
   return NextResponse.json({ ok: true });
 }

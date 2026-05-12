@@ -5,7 +5,7 @@
  * We never expose R2 keys to the browser — uploads use presigned PUT URLs,
  * downloads to the UI use presigned GET URLs (5-min TTL).
  */
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 function required(name: string): string {
@@ -54,6 +54,12 @@ export async function presignPut(opts: {
     ContentType: opts.contentType,
   });
   return getSignedUrl(client(), cmd, { expiresIn: opts.expiresIn ?? 600 });
+}
+
+export async function deleteObject(key: string): Promise<void> {
+  await client().send(
+    new DeleteObjectCommand({ Bucket: required("R2_BUCKET"), Key: key })
+  );
 }
 
 export async function presignGet(opts: {
