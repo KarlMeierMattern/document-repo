@@ -34,7 +34,7 @@ export function DocumentsSearch({
     const val = e.target.value;
     setQ(val);
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => navigate(type, val), 300);
+    timerRef.current = setTimeout(() => navigate(type, val), 150);
   }
 
   return (
