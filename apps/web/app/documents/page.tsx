@@ -1,3 +1,4 @@
+import { DeleteDocumentButton } from "@/components/DeleteDocumentButton";
 import { Header } from "@/components/Header";
 import { auth } from "@/lib/auth";
 import { listDocuments } from "@/lib/queries";
@@ -57,10 +58,10 @@ export default async function DocumentsList({
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border bg-bg">
             {docs.map((d) => (
-              <li key={d.id} className="px-4 py-3">
+              <li key={d.id} className="px-4 py-3 flex items-center gap-2">
                 <Link
                   href={`/documents/${d.id}`}
-                  className="flex items-center justify-between gap-4 hover:opacity-90"
+                  className="flex-1 min-w-0 flex items-center justify-between gap-4 hover:opacity-90"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">
@@ -75,6 +76,7 @@ export default async function DocumentsList({
                     {d.status}
                   </span>
                 </Link>
+                <DeleteDocumentButton id={d.id} />
               </li>
             ))}
           </ul>

@@ -1,3 +1,4 @@
+import { DeleteDocumentButton } from "@/components/DeleteDocumentButton";
 import { Header } from "@/components/Header";
 import { UploadZone } from "@/components/UploadZone";
 import { auth } from "@/lib/auth";
@@ -75,11 +76,11 @@ export default async function Dashboard() {
               {recent.map((d) => (
                 <li
                   key={d.id}
-                  className="rounded-lg border border-border bg-bg p-3"
+                  className="rounded-lg border border-border bg-bg p-3 flex items-start gap-2"
                 >
                   <Link
                     href={`/documents/${d.id}`}
-                    className="block hover:opacity-90"
+                    className="flex-1 min-w-0 hover:opacity-90"
                   >
                     <div className="flex items-center gap-2">
                       <StatusPill status={d.status} />
@@ -90,12 +91,20 @@ export default async function Dashboard() {
                     <div className="mt-1 text-sm font-medium truncate">
                       {d.originalFilename ?? d.id.slice(0, 8)}
                     </div>
-                    {d.docType && (
-                      <div className="text-xs text-muted-fg">
-                        {d.docType.replace(/_/g, " ")}
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {d.docType && (
+                        <span className="text-xs text-muted-fg">
+                          {d.docType.replace(/_/g, " ")}
+                        </span>
+                      )}
+                      {d.nearestReminder && (
+                        <span className="text-xs text-warning">
+                          ⏰ {formatDate(d.nearestReminder)}
+                        </span>
+                      )}
+                    </div>
                   </Link>
+                  <DeleteDocumentButton id={d.id} />
                 </li>
               ))}
             </ul>
