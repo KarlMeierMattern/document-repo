@@ -1,13 +1,33 @@
 import { db, schema } from "@/lib/db";
-import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lte, min, sql } from "drizzle-orm";
 
 export async function recentDocuments(ownerEmail: string, limit = 10) {
-  return db
+  const docs = await db
     .select()
     .from(schema.documents)
     .where(eq(schema.documents.ownerEmail, ownerEmail))
     .orderBy(desc(schema.documents.createdAt))
     .limit(limit);
+
+  if (docs.length === 0) return [];
+
+  const docIds = docs.map((d) => d.id);
+  const reminderRows = await db
+    .select({
+      documentId: schema.reminders.documentId,
+      earliestDue: min(schema.reminders.dueDate),
+    })
+    .from(schema.reminders)
+    .where(
+      and(
+        eq(schema.reminders.status, "pending"),
+        inArray(schema.reminders.documentId, docIds),
+      )
+    )
+    .groupBy(schema.reminders.documentId);
+
+  const reminderMap = new Map(reminderRows.map((r) => [r.documentId, r.earliestDue]));
+  return docs.map((d) => ({ ...d, nearestReminder: reminderMap.get(d.id) ?? null }));
 }
 
 export async function upcomingReminders(ownerEmail: string, days = 30) {
@@ -67,10 +87,30 @@ export async function listDocuments(opts: {
       sql`(${schema.documents.originalFilename} ILIKE ${"%" + search + "%"})`
     );
   }
-  return db
+  const docs = await db
     .select()
     .from(schema.documents)
     .where(and(...filters))
     .orderBy(desc(schema.documents.createdAt))
     .limit(limit);
+
+  if (docs.length === 0) return [];
+
+  const docIds = docs.map((d) => d.id);
+  const reminderRows = await db
+    .select({
+      documentId: schema.reminders.documentId,
+      earliestDue: min(schema.reminders.dueDate),
+    })
+    .from(schema.reminders)
+    .where(
+      and(
+        eq(schema.reminders.status, "pending"),
+        inArray(schema.reminders.documentId, docIds),
+      )
+    )
+    .groupBy(schema.reminders.documentId);
+
+  const reminderMap = new Map(reminderRows.map((r) => [r.documentId, r.earliestDue]));
+  return docs.map((d) => ({ ...d, nearestReminder: reminderMap.get(d.id) ?? null }));
 }

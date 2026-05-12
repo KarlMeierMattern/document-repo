@@ -69,7 +69,9 @@ export default async function DocumentsList({
                     </div>
                     <div className="text-xs text-muted-fg">
                       {d.docType?.replace(/_/g, " ") ?? "—"} ·{" "}
-                      {formatDate(d.createdAt)}
+                      {d.nearestReminder
+                        ? `⏰ ${formatDate(d.nearestReminder)}`
+                        : formatDate(d.createdAt)}
                     </div>
                   </div>
                   <span className="text-[10px] uppercase tracking-wide bg-muted rounded-full px-2 py-0.5">
