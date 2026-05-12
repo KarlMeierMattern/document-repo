@@ -43,11 +43,12 @@ export async function GET(req: Request) {
 
   await sendDigest({ to: ownerEmail, items: flat, baseUrl });
 
-  // Mark all as sent in one update
+  // Record when the email fired without changing status — reminders stay
+  // pending and continue appearing in the digest until the user dismisses them.
   const ids = flat.map((r) => r.id);
   await db
     .update(schema.reminders)
-    .set({ status: "sent", sentAt: new Date() })
+    .set({ sentAt: new Date() })
     .where(inArray(schema.reminders.id, ids));
 
   return NextResponse.json({ ok: true, sent: ids.length });

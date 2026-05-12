@@ -12,9 +12,22 @@ export async function PATCH(
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const { id } = await params;
-  const body = (await req.json().catch(() => ({}))) as { status?: string };
-  if (body.status !== "dismissed" && body.status !== "pending") {
+  const body = (await req.json().catch(() => ({}))) as {
+    status?: string;
+    due_date?: string;
+  };
+  if (
+    body.status !== undefined &&
+    body.status !== "dismissed" &&
+    body.status !== "pending"
+  ) {
     return NextResponse.json({ error: "invalid_status" }, { status: 400 });
+  }
+  if (
+    body.due_date !== undefined &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.due_date)
+  ) {
+    return NextResponse.json({ error: "invalid_due_date" }, { status: 400 });
   }
 
   // Verify ownership via the joined document
@@ -35,9 +48,13 @@ export async function PATCH(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  const updates: Partial<typeof schema.reminders.$inferInsert> = {};
+  if (body.status !== undefined) updates.status = body.status;
+  if (body.due_date !== undefined) updates.dueDate = body.due_date;
+
   await db
     .update(schema.reminders)
-    .set({ status: body.status })
+    .set(updates)
     .where(eq(schema.reminders.id, id));
   return NextResponse.json({ ok: true });
 }

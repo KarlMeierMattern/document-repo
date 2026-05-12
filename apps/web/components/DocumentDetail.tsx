@@ -104,6 +104,17 @@ export function DocumentDetail({
     });
   }
 
+  async function updateReminderDate(id: string, due_date: string) {
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, dueDate: due_date } : r))
+    );
+    await fetch(`/api/reminders/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ due_date }),
+    });
+  }
+
   return (
     <div className="grid lg:grid-cols-2 gap-6">
       <div className="space-y-3">
@@ -206,8 +217,16 @@ export function DocumentDetail({
                     <div className="text-sm font-medium truncate">
                       {r.title}
                     </div>
-                    <div className="text-xs text-muted-fg">
-                      {formatDate(r.dueDate)} · {relativeFromNow(r.dueDate)}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <input
+                        type="date"
+                        defaultValue={r.dueDate}
+                        onChange={(e) => {
+                          if (e.target.value) updateReminderDate(r.id, e.target.value);
+                        }}
+                        className="text-xs text-muted-fg bg-transparent border-b border-dashed border-border focus:outline-none focus:border-fg"
+                      />
+                      <span className="text-xs text-muted-fg">{relativeFromNow(r.dueDate)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

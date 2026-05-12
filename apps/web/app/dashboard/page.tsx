@@ -1,9 +1,10 @@
 import { DeleteDocumentButton } from "@/components/DeleteDocumentButton";
 import { Header } from "@/components/Header";
+import { UpcomingReminders } from "@/components/UpcomingReminders";
 import { UploadZone } from "@/components/UploadZone";
 import { auth } from "@/lib/auth";
 import { countsByType, recentDocuments, upcomingReminders } from "@/lib/queries";
-import { formatDate, relativeFromNow } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -35,34 +36,7 @@ export default async function Dashboard() {
           <h2 className="text-sm font-semibold text-muted-fg mb-2">
             Upcoming (next 30 days)
           </h2>
-          {reminders.length === 0 ? (
-            <p className="text-sm text-muted-fg">Nothing coming up. 🎉</p>
-          ) : (
-            <ul className="divide-y divide-border rounded-lg border border-border bg-bg">
-              {reminders.map(({ reminder, document }) => (
-                <li
-                  key={reminder.id}
-                  className="px-4 py-3 flex items-center justify-between gap-4"
-                >
-                  <div className="min-w-0">
-                    <Link
-                      href={`/documents/${document.id}`}
-                      className="text-sm font-medium hover:underline truncate block"
-                    >
-                      {reminder.title}
-                    </Link>
-                    <div className="text-xs text-muted-fg">
-                      {formatDate(reminder.dueDate)} ·{" "}
-                      {relativeFromNow(reminder.dueDate)}
-                    </div>
-                  </div>
-                  <span className="text-[10px] uppercase tracking-wide rounded-full bg-warning/10 text-warning px-2 py-0.5 whitespace-nowrap">
-                    {reminder.reminderType.replace(/_/g, " ")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <UpcomingReminders items={reminders} />
         </section>
 
         <section>

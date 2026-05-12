@@ -1,11 +1,17 @@
-from ._common import compact, field
+from ._common import ISO_DATE_OR_NULL, compact, field, parse_date, reminder
 
 NAME = "generic"
 
 SYSTEM_PROMPT = """This document doesn't match a known type. Extract a short
 title, one-paragraph summary, and up to 10 free-form key/value pairs
 representing the document's most important facts. Prefer durable identifiers
-(names, dates, IDs, amounts) over filler text."""
+(names, dates, IDs, amounts) over filler text.
+
+Also extract any significant dates (expiry, termination, due, renewal, etc.).
+For each date, infer a sensible remind_on date: when the user should be notified
+in advance so they can act in time. For example, remind 30 days before a lease
+termination, on the day for a payment due date. If a date has no actionable
+lead time needed, set remind_on equal to the date itself."""
 
 TOOL = {
     "name": "record_generic",
@@ -25,6 +31,22 @@ TOOL = {
                         "value": {"type": "string"},
                     },
                     "required": ["key", "value"],
+                },
+            },
+            "significant_dates": {
+                "type": "array",
+                "maxItems": 5,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "label": {
+                            "type": "string",
+                            "description": "Human-readable label, e.g. 'Lease termination'",
+                        },
+                        "date": ISO_DATE_OR_NULL,
+                        "remind_on": ISO_DATE_OR_NULL,
+                    },
+                    "required": ["label", "date", "remind_on"],
                 },
             },
             "confidence": {"type": "number"},
@@ -51,4 +73,15 @@ def transform(p):
                     "confidence": None,
                 }
             )
-    return base, []
+
+    reminders = compact(
+        [
+            reminder(
+                reminder_type="date",
+                title=d.get("label") or "Reminder",
+                due=parse_date(d.get("remind_on")) or parse_date(d.get("date")),
+            )
+            for d in (p.get("significant_dates") or [])
+        ]
+    )
+    return base, reminders
