@@ -90,7 +90,6 @@ export function DocumentDetail({
     startDelete(async () => {
       await fetch(`/api/documents/${doc.id}`, { method: "DELETE" });
       router.push("/dashboard");
-      router.refresh();
     });
   }
 

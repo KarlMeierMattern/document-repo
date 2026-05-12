@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { deleteObject, presignGet } from "@/lib/storage";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -71,5 +72,7 @@ export async function DELETE(
     await deleteObject(doc.r2Key);
   }
   await db.delete(schema.documents).where(eq(schema.documents.id, id));
+  revalidatePath("/dashboard");
+  revalidatePath("/documents");
   return NextResponse.json({ ok: true });
 }
