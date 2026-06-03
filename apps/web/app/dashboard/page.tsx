@@ -46,17 +46,17 @@ export default async function Dashboard() {
           {recent.length === 0 ? (
             <p className="text-sm text-muted-fg">No documents yet.</p>
           ) : (
-            <ul className="grid sm:grid-cols-2 gap-3">
+            <ul className="grid gap-3 sm:grid-cols-2">
               {recent.map((d) => (
                 <li
                   key={d.id}
-                  className="rounded-lg border border-border bg-bg p-3 flex items-start gap-2"
+                  className="min-w-0 rounded-lg border border-border bg-bg p-3"
                 >
                   <Link
                     href={`/documents/${d.id}`}
-                    className="flex-1 min-w-0 hover:opacity-90"
+                    className="block min-w-0 hover:opacity-90"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <StatusPill status={d.status} />
                       <span className="text-xs text-muted-fg">
                         {formatDate(d.createdAt)}
@@ -65,7 +65,7 @@ export default async function Dashboard() {
                     <div className="mt-1 text-sm font-medium truncate">
                       {d.originalFilename ?? d.id.slice(0, 8)}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       {d.docType && (
                         <span className="text-xs text-muted-fg">
                           {d.docType.replace(/_/g, " ")}
@@ -78,7 +78,9 @@ export default async function Dashboard() {
                       )}
                     </div>
                   </Link>
-                  <DeleteDocumentButton id={d.id} />
+                  <div className="mt-2 flex justify-end">
+                    <DeleteDocumentButton id={d.id} />
+                  </div>
                 </li>
               ))}
             </ul>
