@@ -28,7 +28,7 @@ export function UpcomingReminders({ items: initial }: { items: Item[] }) {
       {items.map(({ reminder, document }) => (
         <li
           key={reminder.id}
-          className="px-4 py-3 flex items-center justify-between gap-4"
+          className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
         >
           <div className="min-w-0">
             <Link
@@ -41,7 +41,7 @@ export function UpcomingReminders({ items: initial }: { items: Item[] }) {
               {formatDate(reminder.dueDate)} · {relativeFromNow(reminder.dueDate)}
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 sm:shrink-0">
             <span className="text-[10px] uppercase tracking-wide rounded-full bg-warning/10 text-warning px-2 py-0.5">
               {reminder.reminderType.replace(/_/g, " ")}
             </span>

@@ -116,7 +116,7 @@ export function DocumentDetail({
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
       <div className="space-y-3">
         <div className="rounded-lg border border-border bg-muted aspect-[4/3] overflow-hidden">
           {previewUrl ? (
@@ -140,28 +140,28 @@ export function DocumentDetail({
             </div>
           )}
         </div>
-        <div className="text-xs text-muted-fg">
+        <div className="break-all text-xs text-muted-fg">
           {doc.originalFilename ?? doc.id} · {doc.mimeType}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             disabled={reprocessing || status === "processing"}
             onClick={() => reprocess(false)}
-            className="rounded-lg border border-border px-3 py-2 text-sm font-medium disabled:opacity-50"
+            className="rounded-lg border border-border px-3 py-2 text-sm font-medium disabled:opacity-50 sm:w-auto"
           >
             {status === "processing" ? "Processing…" : "Reprocess"}
           </button>
           <button
             disabled={reprocessing || status === "processing"}
             onClick={() => reprocess(true)}
-            className="rounded-lg border border-border px-3 py-2 text-sm font-medium disabled:opacity-50"
+            className="rounded-lg border border-border px-3 py-2 text-sm font-medium disabled:opacity-50 sm:w-auto"
           >
             Reprocess (high quality)
           </button>
           <button
             disabled={deleting}
             onClick={deleteDocument}
-            className="rounded-lg border border-danger/40 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/5 disabled:opacity-50 ml-auto"
+            className="rounded-lg border border-danger/40 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/5 disabled:opacity-50 sm:ml-auto sm:w-auto"
           >
             {deleting ? "Deleting…" : "Delete"}
           </button>
@@ -175,7 +175,7 @@ export function DocumentDetail({
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-sm font-semibold text-muted-fg mb-2">
+          <h2 className="mb-2 text-sm font-semibold text-muted-fg">
             {doc.docType?.replace(/_/g, " ") ?? "Document"} ·{" "}
             <span className="text-fg">{status}</span>
           </h2>
@@ -211,13 +211,13 @@ export function DocumentDetail({
               {reminders.map((r) => (
                 <li
                   key={r.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg px-3 py-2"
+                  className="flex flex-col gap-3 rounded-lg border border-border bg-bg px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">
                       {r.title}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       <input
                         type="date"
                         defaultValue={r.dueDate}
@@ -286,8 +286,8 @@ function FieldRow({
   const [val, setVal] = useState(f.value);
 
   return (
-    <li className="px-3 py-2 flex items-start gap-3">
-      <div className="w-32 shrink-0 text-xs uppercase tracking-wide text-muted-fg pt-1.5">
+    <li className="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-start sm:gap-3">
+      <div className="w-full shrink-0 pt-0 text-xs uppercase tracking-wide text-muted-fg sm:w-32 sm:pt-1.5">
         {f.key.replace(/_/g, " ")}
       </div>
       <div className="flex-1 min-w-0">
@@ -317,7 +317,7 @@ function FieldRow({
       <button
         onClick={onDelete}
         title="Delete field"
-        className="text-muted-fg hover:text-danger text-xs pt-1"
+        className="self-end pt-1 text-xs text-muted-fg hover:text-danger sm:self-auto"
       >
         ✕
       </button>

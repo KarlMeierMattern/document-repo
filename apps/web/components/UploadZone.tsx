@@ -142,7 +142,7 @@ export function UploadZone({ onChange }: { onChange?: () => void }) {
           if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "rounded-2xl border-2 border-dashed transition p-6 text-center",
+          "rounded-2xl border-2 border-dashed p-4 text-center transition sm:p-6",
           dragOver
             ? "border-accent bg-accent/5"
             : "border-border hover:border-muted-fg"
@@ -196,13 +196,13 @@ export function UploadZone({ onChange }: { onChange?: () => void }) {
           {files.map((f) => (
             <li
               key={f.id}
-              className="rounded-lg border border-border p-3 flex items-center gap-3"
+              className="flex gap-3 rounded-lg border border-border p-3"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">
                   {f.file.name}
                 </div>
-                <div className="text-xs text-muted-fg flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-fg">
                   <span>{(f.file.size / 1024 / 1024).toFixed(1)} MB</span>
                   <span>•</span>
                   <StatusPill status={f.status} />

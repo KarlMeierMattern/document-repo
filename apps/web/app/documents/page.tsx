@@ -35,10 +35,13 @@ export default async function DocumentsList({
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border bg-bg">
             {docs.map((d) => (
-              <li key={d.id} className="px-4 py-3 flex items-center gap-2">
+              <li
+                key={d.id}
+                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center"
+              >
                 <Link
                   href={`/documents/${d.id}`}
-                  className="flex-1 min-w-0 flex items-center justify-between gap-4 hover:opacity-90"
+                  className="flex min-w-0 flex-1 items-start justify-between gap-3 hover:opacity-90 sm:items-center sm:gap-4"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">
@@ -55,7 +58,9 @@ export default async function DocumentsList({
                     {d.status}
                   </span>
                 </Link>
-                <DeleteDocumentButton id={d.id} />
+                <div className="self-end sm:self-auto">
+                  <DeleteDocumentButton id={d.id} />
+                </div>
               </li>
             ))}
           </ul>
