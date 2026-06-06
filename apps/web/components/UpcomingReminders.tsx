@@ -37,6 +37,11 @@ export function UpcomingReminders({ items: initial }: { items: Item[] }) {
             >
               {reminder.title}
             </Link>
+            <div className="text-xs text-muted-fg truncate">
+              {document.displayName ??
+                document.originalFilename ??
+                document.id.slice(0, 8)}
+            </div>
             <div className="text-xs text-muted-fg">
               {formatDate(reminder.dueDate)} · {relativeFromNow(reminder.dueDate)}
             </div>

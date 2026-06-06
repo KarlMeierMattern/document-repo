@@ -76,3 +76,38 @@ export async function DELETE(
   revalidatePath("/documents");
   return NextResponse.json({ ok: true });
 }
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { id } = await params;
+
+  const body = (await req.json().catch(() => ({}))) as { displayName?: string };
+  const parsedName =
+    typeof body.displayName === "string" ? body.displayName.trim() : "";
+  const displayName = parsedName.length > 0 ? parsedName.slice(0, 200) : null;
+
+  const [doc] = await db
+    .select()
+    .from(schema.documents)
+    .where(eq(schema.documents.id, id))
+    .limit(1);
+  if (!doc || doc.ownerEmail !== session.user.email) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  await db
+    .update(schema.documents)
+    .set({ displayName })
+    .where(eq(schema.documents.id, id));
+
+  revalidatePath("/dashboard");
+  revalidatePath("/documents");
+  revalidatePath(`/documents/${id}`);
+  return NextResponse.json({ ok: true, displayName });
+}

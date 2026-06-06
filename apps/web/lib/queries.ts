@@ -84,7 +84,7 @@ export async function listDocuments(opts: {
   if (docType) filters.push(eq(schema.documents.docType, docType));
   if (search) {
     filters.push(
-      sql`(${schema.documents.originalFilename} ILIKE ${"%" + search + "%"})`
+      sql`(${schema.documents.originalFilename} ILIKE ${"%" + search + "%"} OR ${schema.documents.displayName} ILIKE ${"%" + search + "%"})`
     );
   }
   const docs = await db

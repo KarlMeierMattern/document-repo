@@ -65,10 +65,14 @@ export async function deleteObject(key: string): Promise<void> {
 export async function presignGet(opts: {
   key: string;
   expiresIn?: number; // default 300 (5 min)
+  responseContentDisposition?: string;
+  responseContentType?: string;
 }): Promise<string> {
   const cmd = new GetObjectCommand({
     Bucket: required("R2_BUCKET"),
     Key: opts.key,
+    ResponseContentDisposition: opts.responseContentDisposition,
+    ResponseContentType: opts.responseContentType,
   });
   return getSignedUrl(client(), cmd, { expiresIn: opts.expiresIn ?? 300 });
 }

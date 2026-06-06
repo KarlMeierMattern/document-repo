@@ -45,7 +45,7 @@ export default async function DocumentsList({
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">
-                      {d.originalFilename ?? d.id.slice(0, 8)}
+                      {d.displayName ?? d.originalFilename ?? d.id.slice(0, 8)}
                     </div>
                     <div className="text-xs text-muted-fg">
                       {d.docType?.replace(/_/g, " ") ?? "—"} ·{" "}

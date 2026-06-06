@@ -33,7 +33,7 @@ infra/                Deploy scripts
 
 ## Local development
 
-Requires Node 20+, npm, Python 3.11+, Docker (for processor).
+Requires Node 20+, npm, Python 3.12 (for processor), Docker (for processor).
 
 ```bash
 # 1. Install web deps
@@ -52,6 +52,7 @@ npm run dev
 
 # 5. (Separate terminal) Run processor locally
 cd services/processor
+# if using pyenv, this repo pins Python 3.12 via services/processor/.python-version
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp ../../.env.example .env

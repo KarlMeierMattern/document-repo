@@ -15,6 +15,7 @@ export const documents = pgTable("documents", {
   r2Key: text("r2_key").notNull(),
   mimeType: text("mime_type").notNull(),
   originalFilename: text("original_filename"),
+  displayName: text("display_name"),
   docType: text("doc_type"),
   status: text("status").notNull().default("uploaded"),
   userContext: text("user_context"),

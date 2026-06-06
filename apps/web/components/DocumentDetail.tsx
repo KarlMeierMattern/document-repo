@@ -23,6 +23,10 @@ export function DocumentDetail({
   const router = useRouter();
   const [fields, setFields] = useState(initialFields);
   const [reminders, setReminders] = useState(initialReminders);
+  const [displayName, setDisplayName] = useState(doc.displayName ?? "");
+  const [displayNameSaved, setDisplayNameSaved] = useState<
+    "idle" | "saving" | "saved"
+  >("idle");
   const [context, setContext] = useState(doc.userContext ?? "");
   const [contextSaved, setContextSaved] = useState<"idle" | "saving" | "saved">(
     "idle"
@@ -30,6 +34,9 @@ export function DocumentDetail({
   const [reprocessing, startReprocess] = useTransition();
   const [deleting, startDelete] = useTransition();
   const [status, setStatus] = useState(doc.status);
+  const [newReminderTitle, setNewReminderTitle] = useState("Termination date");
+  const [newReminderDate, setNewReminderDate] = useState("");
+  const [addingReminder, setAddingReminder] = useState(false);
 
   async function saveField(fieldId: string, value: string) {
     setFields((prev) =>
@@ -58,6 +65,21 @@ export function DocumentDetail({
     });
     setContextSaved("saved");
     setTimeout(() => setContextSaved("idle"), 1500);
+  }
+
+  async function saveDisplayName() {
+    setDisplayNameSaved("saving");
+    const trimmed = displayName.trim();
+    const nextName = trimmed.length > 0 ? trimmed.slice(0, 200) : "";
+    setDisplayName(nextName);
+    await fetch(`/api/documents/${doc.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ displayName: nextName }),
+    });
+    setDisplayNameSaved("saved");
+    setTimeout(() => setDisplayNameSaved("idle"), 1500);
+    router.refresh();
   }
 
   function reprocess(highQuality = false) {
@@ -104,6 +126,11 @@ export function DocumentDetail({
     });
   }
 
+  async function deleteReminder(id: string) {
+    setReminders((prev) => prev.filter((r) => r.id !== id));
+    await fetch(`/api/reminders/${id}`, { method: "DELETE" });
+  }
+
   async function updateReminderDate(id: string, due_date: string) {
     setReminders((prev) =>
       prev.map((r) => (r.id === id ? { ...r, dueDate: due_date } : r))
@@ -113,6 +140,36 @@ export function DocumentDetail({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ due_date }),
     });
+  }
+
+  async function updateReminderTitle(id: string, title: string) {
+    const normalized = title.trim();
+    if (!normalized) return;
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, title: normalized } : r))
+    );
+    await fetch(`/api/reminders/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: normalized }),
+    });
+  }
+
+  async function addReminder() {
+    const title = newReminderTitle.trim();
+    if (!title || !newReminderDate) return;
+    setAddingReminder(true);
+    const res = await fetch(`/api/documents/${doc.id}/reminders`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title, due_date: newReminderDate }),
+    });
+    setAddingReminder(false);
+    if (!res.ok) return;
+    const json = (await res.json()) as { reminder: Reminder };
+    setReminders((prev) => [json.reminder, ...prev]);
+    setNewReminderDate("");
+    router.refresh();
   }
 
   return (
@@ -144,6 +201,12 @@ export function DocumentDetail({
           {doc.originalFilename ?? doc.id} · {doc.mimeType}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <a
+            href={`/api/documents/${doc.id}/download`}
+            className="rounded-lg border border-border px-3 py-2 text-center text-sm font-medium sm:w-auto"
+          >
+            Download
+          </a>
           <button
             disabled={reprocessing || status === "processing"}
             onClick={() => reprocess(false)}
@@ -175,6 +238,27 @@ export function DocumentDetail({
 
       <div className="space-y-6">
         <div>
+          <h2 className="text-sm font-semibold text-muted-fg mb-2">
+            Display name
+          </h2>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            onBlur={saveDisplayName}
+            placeholder={doc.originalFilename ?? "Give this document a name"}
+            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+          />
+          <div className="text-xs text-muted-fg mt-1">
+            {displayNameSaved === "saving"
+              ? "Saving…"
+              : displayNameSaved === "saved"
+                ? "Saved"
+                : "Used on dashboard and in lists"}
+          </div>
+        </div>
+
+        <div>
           <h2 className="mb-2 text-sm font-semibold text-muted-fg">
             {doc.docType?.replace(/_/g, " ") ?? "Document"} ·{" "}
             <span className="text-fg">{status}</span>
@@ -204,6 +288,32 @@ export function DocumentDetail({
           <h2 className="text-sm font-semibold text-muted-fg mb-2">
             Reminders
           </h2>
+          <div className="mb-3 grid gap-2 rounded-lg border border-border bg-bg p-3 sm:grid-cols-[1fr_auto_auto]">
+            <input
+              type="text"
+              value={newReminderTitle}
+              onChange={(e) => setNewReminderTitle(e.target.value)}
+              placeholder="Reminder label (e.g. Termination date)"
+              className="w-full rounded border border-border bg-bg px-2 py-1.5 text-sm"
+            />
+            <input
+              type="date"
+              value={newReminderDate}
+              onChange={(e) => setNewReminderDate(e.target.value)}
+              className="rounded border border-border bg-bg px-2 py-1.5 text-sm"
+            />
+            <button
+              onClick={addReminder}
+              disabled={addingReminder || !newReminderTitle.trim() || !newReminderDate}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+                newReminderDate
+                  ? "border border-warning/60 bg-warning/10 text-warning hover:bg-warning/20"
+                  : "border border-border text-fg"
+              }`}
+            >
+              {addingReminder ? "Adding…" : "Add date reminder"}
+            </button>
+          </div>
           {reminders.length === 0 ? (
             <p className="text-sm text-muted-fg">None.</p>
           ) : (
@@ -214,9 +324,16 @@ export function DocumentDetail({
                   className="flex flex-col gap-3 rounded-lg border border-border bg-bg px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {r.title}
-                    </div>
+                    <input
+                      type="text"
+                      defaultValue={r.title}
+                      onBlur={(e) => {
+                        if (e.target.value !== r.title) {
+                          updateReminderTitle(r.id, e.target.value);
+                        }
+                      }}
+                      className="w-full min-w-0 truncate border-b border-dashed border-border bg-transparent text-sm font-medium focus:border-fg focus:outline-none"
+                    />
                     <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       <input
                         type="date"
@@ -241,6 +358,12 @@ export function DocumentDetail({
                         Dismiss
                       </button>
                     )}
+                    <button
+                      onClick={() => deleteReminder(r.id)}
+                      className="text-xs text-muted-fg hover:text-danger"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </li>
               ))}

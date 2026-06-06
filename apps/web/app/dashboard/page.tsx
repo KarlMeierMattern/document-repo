@@ -63,7 +63,7 @@ export default async function Dashboard() {
                       </span>
                     </div>
                     <div className="mt-1 text-sm font-medium truncate">
-                      {d.originalFilename ?? d.id.slice(0, 8)}
+                      {d.displayName ?? d.originalFilename ?? d.id.slice(0, 8)}
                     </div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       {d.docType && (

@@ -3,6 +3,12 @@ import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+const TRANSIENT_STATUSES = new Set([502, 503, 504]);
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -47,35 +53,87 @@ export async function POST(
     .set({ status: "processing", error: null })
     .where(eq(schema.documents.id, id));
 
-  // Fire-and-forget: we don't await processing, just kicks the job.
-  // Processor writes status when finished. Browser polls /api/documents/[id].
-  const res = await fetch(processorUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-processor-secret": processorSecret,
-    },
-    body: JSON.stringify({
-      document_id: doc.id,
-      r2_key: doc.r2Key,
-      mime_type: doc.mimeType,
-      model,
-    }),
-    // Don't block this route on processor latency; Cloud Run will keep running.
-    // But we still want to surface immediate errors (auth, network) to the user.
-    signal: AbortSignal.timeout(15_000),
-  }).catch((e) => {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 502 });
+  const timeoutMsRaw = parseInt(
+    process.env.PROCESSOR_TRIGGER_TIMEOUT_MS ?? "120000",
+    10
+  );
+  const timeoutMs =
+    Number.isFinite(timeoutMsRaw) && timeoutMsRaw >= 5000 ? timeoutMsRaw : 120000;
+
+  const payload = JSON.stringify({
+    document_id: doc.id,
+    r2_key: doc.r2Key,
+    mime_type: doc.mimeType,
+    model,
   });
 
-  if (!res.ok && res.status !== 200 && res.status !== 202) {
+  let res: Response | null = null;
+  let networkError: string | null = null;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    networkError = null;
+    res = null;
+    try {
+      res = await fetch(processorUrl, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-processor-secret": processorSecret,
+        },
+        body: payload,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (e) {
+      networkError = String(e);
+    }
+
+    if (!res && networkError) {
+      if (attempt < 2) {
+        await sleep(500);
+        continue;
+      }
+      await db
+        .update(schema.documents)
+        .set({ status: "failed", error: `processor network error: ${networkError}` })
+        .where(eq(schema.documents.id, id));
+      return NextResponse.json(
+        { error: "processor_network_error", detail: networkError },
+        { status: 502 }
+      );
+    }
+
+    if (res && TRANSIENT_STATUSES.has(res.status) && attempt < 2) {
+      await sleep(500);
+      continue;
+    }
+    break;
+  }
+
+  if (!res) {
+    await db
+      .update(schema.documents)
+      .set({ status: "failed", error: "processor request failed before response" })
+      .where(eq(schema.documents.id, id));
+    return NextResponse.json(
+      { error: "processor_network_error", detail: "no response from processor" },
+      { status: 502 }
+    );
+  }
+
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => "")).slice(0, 500);
     // Roll status back so user can retry
     await db
       .update(schema.documents)
-      .set({ status: "failed", error: `processor returned ${res.status}` })
+      .set({
+        status: "failed",
+        error: detail
+          ? `processor returned ${res.status}: ${detail}`
+          : `processor returned ${res.status}`,
+      })
       .where(eq(schema.documents.id, id));
     return NextResponse.json(
-      { error: "processor_error", status: res.status },
+      { error: "processor_error", status: res.status, detail },
       { status: 502 }
     );
   }
